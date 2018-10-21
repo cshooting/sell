@@ -12,7 +12,7 @@
     </div>
     <div class="foods-wrapper" ref="foodWrapper">
       <ul>
-        <li v-for="item in goods" class="food-list food-list-hook">
+        <li v-for="item in goods" class="food-list">
           <h1 class="title">{{item.name}}</h1>
           <ul>
             <li v-for="food in item.foods" class="food-item border-1px">
@@ -57,14 +57,14 @@
         this.menuScroll = new BScorll(this.$refs.menuWrapper);
         this.foodScroll = new BScorll(this.$refs.foodWrapper);
       },
-      _calculateHeight() {
-        let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
-        let height = 0;
-        this.listHeight.push(height);
-        for (let i=0;i<foodList.length;i++){
-          let item = foodList[i];
-        }
-      }
+      // _calculateHeight() {
+      //   let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
+      //   let height = 0;
+      //   this.listHeight.push(height);
+      //   for (let i=0;i<foodList.length;i++){
+      //     let item = foodList[i];
+      //   }
+      // }
     },
     created() {
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
@@ -74,7 +74,6 @@
           this.goods = res.data;
           this.$nextTick(function () {
             this._initScroll();
-
           })
         }
       });
