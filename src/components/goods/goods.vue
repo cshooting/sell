@@ -57,14 +57,14 @@
         this.menuScroll = new BScorll(this.$refs.menuWrapper);
         this.foodScroll = new BScorll(this.$refs.foodWrapper);
       },
-      // _calculateHeight() {
-      //   let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
-      //   let height = 0;
-      //   this.listHeight.push(height);
-      //   for (let i=0;i<foodList.length;i++){
-      //     let item = foodList[i];
-      //   }
-      // }
+      _calculateHeight() {
+        let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
+        let height = 0;
+        this.listHeight.push(height);
+        for (let i=0;i<foodList.length;i++){
+          let item = foodList[i];
+        }
+      }
     },
     created() {
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
