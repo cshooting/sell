@@ -2,7 +2,7 @@
   <div class="goods">
     <div class="menu-wrapper" ref="menuWrapper">
       <ul>
-        <li v-for="item in goods" class="menu-item">
+        <li v-for="(item,index) in goods" class="menu-item" :class="{'current':currentIndex === index}" @click="selectMenu(index)">
           <span class="text border-1px">
             <span v-show="item.type > 0" class="icon" :class="classMap[item.type]"></span>
           {{item.name}}
@@ -12,7 +12,7 @@
     </div>
     <div class="foods-wrapper" ref="foodWrapper">
       <ul>
-        <li v-for="item in goods" class="food-list">
+        <li v-for="item in goods" class="food-list food-list-hook">
           <h1 class="title">{{item.name}}</h1>
           <ul>
             <li v-for="food in item.foods" class="food-item border-1px">
@@ -27,8 +27,11 @@
                   <span>好评率{{food.rating}}%</span>
                 </div>
                 <div class="price">
-                  <span class="now">${{food.price}}</span>
-                  <span class="old" v-show="food.oldPrice">${{food.oldPrice}}</span>
+                  <span class="now">￥{{food.price}}</span>
+                  <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
+                </div>
+                <div class="cartcontrol-wrapper">
+                  <cartcontrol :food="food"></cartcontrol>
                 </div>
               </div>
             </li>
@@ -36,35 +39,83 @@
         </li>
       </ul>
     </div>
+    <shop-cart :deliveryPrice="seller.deliveryPrice" :minPrice="seller.minPrice" :selectFoods="selectFoods"></shop-cart>
   </div>
 </template>
 
 <script>
   import BScorll from 'better-scroll'
+  import ShopCart from "../shopCart/shopCart";
+  import Cartcontrol from "../cartcontrol/cartcontrol";
+
   const ERR_OK = 0;
   export default {
+    components: {
+      Cartcontrol,
+      ShopCart
+    },
     props: {
       seller: Object
     },
     data() {
       return {
-        goods: [],
-        listHeight: []
+        goods: {},
+        listHeight: [],
+        scrollY: 0
+      }
+    },
+    computed: {
+      currentIndex() {
+        for (let i = 0; i < this.listHeight.length; i++) {
+          let height1 = this.listHeight[i];
+          let height2 = this.listHeight[i + 1];
+          if (!height2 || this.scrollY >= height1 && this.scrollY < height2) {
+            return i;
+          }
+        }
+        return 0;
+      },
+      selectFoods(){
+        let foods = [];
+        this.goods.forEach((good) => {
+          good.foods.forEach((food) => {
+            if(food.count){
+              foods.push(food);
+            }
+          });
+        });
+        return foods;
       }
     },
     methods: {
-      _initScroll() {
-        this.menuScroll = new BScorll(this.$refs.menuWrapper);
-        this.foodScroll = new BScorll(this.$refs.foodWrapper);
+      selectMenu(index) {
+        let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
+        let el = foodList[index];
+        this.foodScroll.scrollToElement(el,300);
       },
-      // _calculateHeight() {
-      //   let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
-      //   let height = 0;
-      //   this.listHeight.push(height);
-      //   for (let i=0;i<foodList.length;i++){
-      //     let item = foodList[i];
-      //   }
-      // }
+      _initScroll() {
+        this.menuScroll = new BScorll(this.$refs.menuWrapper,{
+          click: true
+        });
+        this.foodScroll = new BScorll(this.$refs.foodWrapper,{
+          click: true,
+          probeType: 3
+        });
+        this.foodScroll.on('scroll', (pos) => {
+          this.scrollY = Math.abs(Math.round(pos.y));
+        });
+      },
+      _calculateHeight() {
+        //获取每个分类li的高度
+        let foodList = this.$refs.foodWrapper.getElementsByClassName('food-list-hook');
+        let height = 0;
+        this.listHeight.push(height);
+        for (let i = 0; i < foodList.length; i++) {
+          let item = foodList[i];
+          height += item.clientHeight;
+          this.listHeight.push(height);
+        }
+      }
     },
     created() {
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
@@ -72,8 +123,10 @@
         res = res.data;
         if (res.errno === ERR_OK) {
           this.goods = res.data;
+          //dom真正发生变化在nextTick函数回调之后，所以在操作原生dom时要在nextTick中操作
           this.$nextTick(function () {
             this._initScroll();
+            this._calculateHeight();
           })
         }
       });
@@ -100,6 +153,12 @@
         width 56px
         line-height 14px
         padding 0 12px
+        &.current
+          position relative
+          z-index 10
+          margin-top -1px
+          background #fff
+          font-weight 700
         .text
           display table-cell
           width 56px
@@ -174,4 +233,8 @@
               text-decoration line-through
               font-size 10px
               color rgb(147, 153, 159)
+          .cartcontrol-wrapper
+            position absolute
+            right 0
+            bottom 0
 </style>
