@@ -59,7 +59,7 @@
     },
     data() {
       return {
-        goods: {},
+        goods: [],//forEach()仅能遍历Array，不能遍历Object
         listHeight: [],
         scrollY: 0
       }
@@ -123,6 +123,7 @@
         res = res.data;
         if (res.errno === ERR_OK) {
           this.goods = res.data;
+          console.log(this.goods)
           //dom真正发生变化在nextTick函数回调之后，所以在操作原生dom时要在nextTick中操作
           this.$nextTick(function () {
             this._initScroll();
