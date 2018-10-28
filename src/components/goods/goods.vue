@@ -15,7 +15,7 @@
         <li v-for="item in goods" class="food-list food-list-hook">
           <h1 class="title">{{item.name}}</h1>
           <ul>
-            <li v-for="food in item.foods" class="food-item border-1px">
+            <li @click="selectFood(food)" v-for="food in item.foods" class="food-item border-1px">
               <div class="icon">
                 <img width="57" height="57" :src="food.icon"/>
               </div>
@@ -40,6 +40,7 @@
       </ul>
     </div>
     <shop-cart :deliveryPrice="seller.deliveryPrice" :minPrice="seller.minPrice" :selectFoods="selectFoods"></shop-cart>
+    <food :food="selectedFood" ref="food"></food>
   </div>
 </template>
 
@@ -47,10 +48,12 @@
   import BScorll from 'better-scroll'
   import ShopCart from "../shopCart/shopCart";
   import Cartcontrol from "../cartcontrol/cartcontrol";
+  import Food from "../food/food";
 
   const ERR_OK = 0;
   export default {
     components: {
+      Food,
       Cartcontrol,
       ShopCart
     },
@@ -61,7 +64,8 @@
       return {
         goods: [],//forEach()仅能遍历Array，不能遍历Object
         listHeight: [],
-        scrollY: 0
+        scrollY: 0,
+        selectedFood:{}
       }
     },
     computed: {
@@ -115,6 +119,10 @@
           height += item.clientHeight;
           this.listHeight.push(height);
         }
+      },
+      selectFood(food){
+        this.selectedFood = food;
+        this.$refs.food.show();
       }
     },
     created() {
@@ -123,7 +131,7 @@
         res = res.data;
         if (res.errno === ERR_OK) {
           this.goods = res.data;
-          console.log(this.goods)
+          console.log(this.goods);
           //dom真正发生变化在nextTick函数回调之后，所以在操作原生dom时要在nextTick中操作
           this.$nextTick(function () {
             this._initScroll();

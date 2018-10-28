@@ -1,8 +1,8 @@
 <template>
   <div class="shopcart">
-    <div class="content" @click="toggleList">
+    <div class="content">
       <div class="content-left">
-        <div class="logo-wrapper">
+        <div class="logo-wrapper" @click="toggleList">
           <div class="logo" :class="{'highlight':totalCount>0}">
             <i class="icon-shopping_cart" :class="{'highlight':totalCount>0}"></i>
           </div>
@@ -11,7 +11,7 @@
         <div class="price" :class="{'highlight':totalPrice>0}">￥{{totalPrice}}</div>
         <div class="desc">另需配送费￥{{deliveryPrice}}元</div>
       </div>
-      <div class="content-right">
+      <div class="content-right" @click="pay">
         <div class="pay" :class="payClass">{{payDesc}}</div>
       </div>
     </div>
@@ -36,9 +36,9 @@
         </div>
       </div>
     </transition>
-    <div class="list-mask" v-show="listShow"></div>
+    <!--模糊背景-->
+    <div class="list-mask" v-show="listShow" @click="hideList"></div>
   </div>
-  <!--<div class="list-mask" v-show="listShow"></div>-->
 </template>
 
 <script>
@@ -120,12 +120,20 @@
           return;
         }
         this.fold = !this.fold;
-        console.log(this.fold)
       },
       empty(){
         this.selectFoods.forEach((food) => {
           food.count = 0;
         })
+      },
+      hideList(){
+        this.fold = true;
+      },
+      pay(){
+        if(this.totalPrice<this.minPrice){
+          return
+        }
+        window.alert(`支付${this.totalPrice}`);
       }
     }
   }
